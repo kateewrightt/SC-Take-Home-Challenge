@@ -17,7 +17,8 @@ import (
 // There's no real need for you to be editting these, but feel free to tweak it to suit your needs.
 // If you do make changes here, be ready to discuss why these changes were made.
 
-const dataSetSize = 1000
+// Made DataSetSize a public variable to use in testing
+const DataSetSize = 1000
 const DefaultOrgID = "c1556e17-b7c0-45a3-a6ae-9546248fb17a"
 
 type Folder struct {
@@ -36,7 +37,7 @@ func GenerateData() []*Folder {
 	rng, _ := codename.DefaultRNG()
 	sampleData := []*Folder{}
 
-	for i := 1; i < dataSetSize; i++ {
+	for i := 1; i < DataSetSize; i++ {
 		orgId := uuid.FromStringOrNil(DefaultOrgID)
 
 		if i%3 == 0 {
