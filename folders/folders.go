@@ -4,10 +4,11 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-// GetAllFolders fetches all folders for an org
-func GetAllFolders(req *FetchFolderRequest) (*FetchFolderResponse, error) {
+// GetAllFolders fetches all folders for an organisation
+// This function now accepts dependencies to facilitate dependency injection
+func GetAllFolders(req *FetchFolderRequest, deps FetchFolderDependencies) (*FetchFolderResponse, error) {
 
-	// Unused variables might bring back when implementing pagination
+	// Unused Variables
 	// var (
 	//	err error
 	//	f1  Folder
@@ -15,9 +16,10 @@ func GetAllFolders(req *FetchFolderRequest) (*FetchFolderResponse, error) {
 	// )
 	// f := []Folder{}
 
-	// Fetch all folders by org ID
+	// We now use the DataFetcher to fetch all folders for an Organisation ID
+	r, err := FetchAllFoldersByOrgID(req.OrgID, deps.DataFetcher)
+
 	// Add error handling
-	r, err := FetchAllFoldersByOrgID(req.OrgID)
 	if err != nil {
 		return nil, err
 	}
@@ -37,22 +39,42 @@ func GetAllFolders(req *FetchFolderRequest) (*FetchFolderResponse, error) {
 	//	fp = append(fp, &v1)
 	//}
 
+	// Uses previous code here that is unecessary
 	//var ffr *FetchFolderResponse
 	//ffr = &FetchFolderResponse{Folders: fp}
 	//return ffr, nil
 
 	// Simplified creation of FetchFolderResponse
+	// We directly assign the folders returned by FetchAllFoldersByOrgID to the response
 	ffr := &FetchFolderResponse{Folders: r}
 	return ffr, nil
 }
 
-func FetchAllFoldersByOrgID(orgID uuid.UUID) ([]*Folder, error) {
+// Interface for loading folders data in memory
+// Worth noting loading data in memory and query/filter in memory
+// Is always a bad idea in most cases as opposed to leveraging a DB solution and their querying
+type DataFetcherInterface interface {
+	GetFolders() []*Folder
+}
+
+// DefaultFetcher is a default implementation of DataFetcherInterface
+// We use this to fetch Sample data from a local source
+type DefaultFetcher struct{}
+
+// GetFolders retrieves sample data (default implementation)
+func (f DefaultFetcher) GetFolders() []*Folder {
+	return GetSampleData()
+}
+
+// FetchAllFoldersByOrgID retrieves all folders for a given organisation ID
+// We use the DataFetcherInterface to obtain data
+func FetchAllFoldersByOrgID(orgID uuid.UUID, dataFetcher DataFetcherInterface) ([]*Folder, error) {
 	// We want the retrieval of data here to be a modular component in our app
 	// Here the default method is getting data through local json
 	// We want to be able to generate this data in tests too
 	// To faciliate this we will change the hardcoded function call into a interface
 	// And inject the data retrieval as an application dependency
-	folders := GetSampleData()
+	folders := dataFetcher.GetFolders()
 
 	resFolder := []*Folder{}
 	for _, folder := range folders {

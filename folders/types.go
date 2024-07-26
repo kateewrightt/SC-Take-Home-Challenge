@@ -6,6 +6,10 @@ type FetchFolderRequest struct {
 	OrgID uuid.UUID
 }
 
+type FetchFolderDependencies struct {
+	DataFetcher DataFetcherInterface
+}
+
 type FetchFolderResponse struct {
 	Folders []*Folder
 }

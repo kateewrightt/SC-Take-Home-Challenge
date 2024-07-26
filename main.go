@@ -12,7 +12,9 @@ func main() {
 		OrgID: uuid.FromStringOrNil(folders.DefaultOrgID),
 	}
 
-	res, err := folders.GetAllFolders(req)
+	res, err := folders.GetAllFolders(req, folders.FetchFolderDependencies{
+		DataFetcher: folders.DefaultFetcher{},
+	})
 	if err != nil {
 		fmt.Printf("%v", err)
 		return
