@@ -8,13 +8,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type MockFetcher struct{}
+
+func (f MockFetcher) GetFolders() []*folders.Folder {
+	testData := folders.GenerateData()
+	return testData
+}
 func Test_GetAllFolders(t *testing.T) {
 	t.Run("returns all folders with valid orgID", func(t *testing.T) {
 		req := &folders.FetchFolderRequest{
 			OrgID: uuid.FromStringOrNil(folders.DefaultOrgID),
 		}
 
-		foldersResp, err := folders.GetAllFolders(req)
+		deps := folders.FetchFolderDependencies{
+			DataFetcher: MockFetcher{},
+		}
+		foldersResp, err := folders.GetAllFolders(req, deps)
 
 		// Reading the generate data code, we set 1/3 folders to be a random org id
 		// The rest are default org id
@@ -28,7 +37,10 @@ func Test_GetAllFolders(t *testing.T) {
 			OrgID: uuid.Nil,
 		}
 
-		foldersResp, err := folders.GetAllFolders(req)
+		deps := folders.FetchFolderDependencies{
+			DataFetcher: MockFetcher{},
+		}
+		foldersResp, err := folders.GetAllFolders(req, deps)
 
 		assert.Len(t, foldersResp.Folders, 0)
 		assert.Nil(t, err)
@@ -40,7 +52,10 @@ func Test_GetAllFolders(t *testing.T) {
 			OrgID: invalidUUID,
 		}
 
-		foldersResp, err := folders.GetAllFolders(req)
+		deps := folders.FetchFolderDependencies{
+			DataFetcher: MockFetcher{},
+		}
+		foldersResp, err := folders.GetAllFolders(req, deps)
 
 		assert.Len(t, foldersResp.Folders, 0)
 		assert.Nil(t, err)
