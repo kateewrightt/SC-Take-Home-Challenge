@@ -1,6 +1,8 @@
 package folders
 
 import (
+	"fmt"
+
 	"github.com/gofrs/uuid"
 )
 
@@ -18,7 +20,6 @@ func GetAllFolders(req *FetchFolderRequest, deps FetchFolderDependencies) (*Fetc
 
 	// We now use the DataFetcher to fetch all folders for an Organisation ID
 	r, err := FetchAllFoldersByOrgID(req.OrgID, deps.DataFetcher)
-
 	// Add error handling
 	if err != nil {
 		return nil, err
@@ -83,4 +84,15 @@ func FetchAllFoldersByOrgID(orgID uuid.UUID, dataFetcher DataFetcherInterface) (
 		}
 	}
 	return resFolder, nil
+}
+
+// Function to fetch and print all folders without pagination
+func FetchAndPrintAllFolders(req *FetchFolderRequest, deps FetchFolderDependencies) {
+	response, err := GetAllFolders(req, deps)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+
+	PrettyPrint(response)
 }
