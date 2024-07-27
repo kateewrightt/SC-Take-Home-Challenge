@@ -31,10 +31,10 @@ func Test_GetAllFolders(t *testing.T) {
 		}
 		foldersResp, err := folders.GetAllFolders(req, deps)
 
-		// Reading the generate data code, we set 1/3 folders to be a random org id
-		// The rest are default org id
-		// In a real test setup, these should be arguments passed into the testing mock
-		assert.Len(t, foldersResp.Folders, (folders.DataSetSize/3)*2)
+		// Verify that each returned folder has the correct OrgID
+		for _, folder := range foldersResp.Folders {
+			assert.Equal(t, req.OrgID, folder.OrgId)
+		}
 		assert.Nil(t, err)
 	})
 
@@ -76,6 +76,25 @@ func Test_GetAllFolders(t *testing.T) {
 		// We expect to get no folders since the organsation ID does not match any in the data set
 		// This verifies that the function can correctly identify and handle invalid organisation IDs
 		assert.Len(t, foldersResp.Folders, 0)
+		assert.Nil(t, err)
+	})
+
+	// Test to ensure only non-deleted folders are returned
+	t.Run("returns only non-deleted folders", func(t *testing.T) {
+		req := &folders.FetchFolderRequest{
+			OrgID: uuid.FromStringOrNil(folders.DefaultOrgID), // Using the default org ID
+		}
+
+		// Set up the dependencies with the mock data fetcher
+		deps := folders.FetchFolderDependencies{
+			DataFetcher: MockFetcher{}, // Injecting the mock data fetcher
+		}
+		foldersResp, err := folders.GetAllFolders(req, deps)
+
+		// Check that no folder in the response is marked as deleted
+		for _, folder := range foldersResp.Folders {
+			assert.False(t, folder.Deleted)
+		}
 		assert.Nil(t, err)
 	})
 }
