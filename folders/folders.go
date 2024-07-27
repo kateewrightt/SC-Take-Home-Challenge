@@ -79,7 +79,7 @@ func FetchAllFoldersByOrgID(orgID uuid.UUID, dataFetcher DataFetcherInterface) (
 
 	resFolder := []*Folder{}
 	for _, folder := range folders {
-		if folder.OrgId == orgID {
+		if folder.OrgId == orgID && !folder.Deleted {
 			resFolder = append(resFolder, folder)
 		}
 	}
