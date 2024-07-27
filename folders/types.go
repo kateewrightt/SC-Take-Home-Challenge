@@ -12,4 +12,5 @@ type FetchFolderDependencies struct {
 
 type FetchFolderResponse struct {
 	Folders []*Folder
+	Token   string
 }
